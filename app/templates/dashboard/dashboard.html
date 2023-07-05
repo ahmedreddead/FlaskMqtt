@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100%;
+            padding: 50px;
+        }
+
+        .dashboard-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .dashboard-partition {
+            position: relative;
+            width: {{ partition_width }}px; /* Replace with Flask variable */
+            height: {{ partition_height }}px; /* Replace with Flask variable */
+            border: 1px dashed #ccc;
+            text-align: center;
+            padding: 20px;
+            margin: {{ padding/2 }}px; /* Replace with Flask variable */
+        }
+
+        .dashboard-item {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+            /*cursor: move; */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #okButton {
+            display: none; /* Hide the OK button initially */
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="dashboard" id="dashboardContainer"></div>
+    <button id="editButton">Edit</button>
+    <button id="okButton">OK</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script>
+        var isEditMode = false; // Variable to track if the dashboard is in edit mode
+
+        $(document).ready(function() {
+            $(".dashboard-item").draggable({
+                revert: "invalid",
+                zIndex: 100,
+                cursor: "move",
+                disabled: true // Disable dragging initially
+            });
+
+            $(".dashboard-partition").droppable({
+                accept: ".dashboard-item",
+                drop: function(event, ui) {
+                    var draggable = ui.draggable;
+                    var droppable = $(this);
+                    var droppableItem = droppable.children(".dashboard-item");
+
+                    if (droppableItem.length > 0) {
+                        var draggableParent = draggable.parent();
+                        var droppableParent = droppableItem.parent();
+
+                        draggable.detach().appendTo(droppableParent);
+                        droppableItem.detach().appendTo(draggableParent);
+                    } else {
+                        if (!draggable.parent().is(droppable)) {
+                            draggable.detach().appendTo(droppable);
+                        }
+                    }
+
+                    draggable.css({ top: 0, left: 0 });
+                },
+                disabled: true // Disable dropping initially
+            });
+
+            // Edit button click event
+            $("#editButton").click(function() {
+                if (!isEditMode) {
+                    $(".dashboard-item").draggable("enable"); // Enable dragging
+                    $(".dashboard-partition").droppable("enable"); // Enable dropping
+                    $("#okButton").show(); // Show the OK button
+                    isEditMode = true;
+                }
+            });
+
+            // OK button click event
+            $("#okButton").click(function() {
+                if (isEditMode) {
+                    $(".dashboard-item").draggable("disable"); // Disable dragging
+                    $(".dashboard-partition").droppable("disable"); // Disable dropping
+                    $("#okButton").hide(); // Hide the OK button
+                    isEditMode = false;
+                }
+            });
+        });
+
+        // Get values from Flask
+        var padding = {{ padding }}; // Replace with Flask variable
+        var numPerRow = {{ num_per_row }}; // Replace with Flask variable
+        var numItems = {{ num_items }}; // Replace with Flask variable
+
+        // Create the dashboard partitions dynamically
+        var dashboardContainer = $("#dashboardContainer");
+        for (var i = 0; i < numItems; i++) {
+            var row = $('<div class="dashboard-row"></div>');
+            for (var j = 0; j < numPerRow; j++) {
+                var partition = $('<div class="dashboard-partition"></div>');
+                partition.attr('id', 'partition-' + j);
+                row.append(partition);
+            }
+            dashboardContainer.append(row);
+        }
+
+        // Add sample items to partitions
+        var items = {{ items_flask|tojson }};
+
+        var itemIndex = 0;
+        $(".dashboard-partition").each(function() {
+            var partition = $(this);
+            var item = items[itemIndex % items.length];
+            var element = $('<div class="dashboard-item">' + item.text + '</div>');
+            element.attr('id', 'item-' + itemIndex);
+            partition.append(element);
+            itemIndex++;
+        });
+    </script>
+</body>
+</html>

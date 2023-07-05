@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Sensor Data</h1>
+    <div id="data"></div>
+
+    <script type="text/javascript">
+        function updateSensorData(sensorType, sensorData) {
+            for (let sensorId in sensorData) {
+                let sensorElementId = `${sensorType}${sensorId}`;
+                let sensorElement = document.getElementById(sensorElementId);
+                if (!sensorElement) {
+                    let sensorTypeElement = document.getElementById(sensorType);
+                    if (!sensorTypeElement) {
+                        sensorTypeElement = document.createElement('div');
+                        sensorTypeElement.id = sensorType;
+                        sensorTypeElement.innerHTML = `<h2>${sensorType}</h2>`;
+                        document.getElementById("data").appendChild(sensorTypeElement);
+                    }
+                    sensorElement = document.createElement('div');
+                    sensorElement.id = sensorElementId;
+                    document.getElementById(sensorType).appendChild(sensorElement);
+                }
+                sensorElement.innerHTML = `Sensor ${sensorId}: ${sensorData[sensorId]}`;
+            }
+        }
+
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var data = JSON.parse(this.responseText);
+                for (let i = 0; i < sensorTypes.length; i++) {
+                    let sensorType = sensorTypes[i];
+                    if (data[sensorType]) {
+                        updateSensorData(sensorType, data[sensorType]);
+                    }
+                }
+            }
+        };
+        xhr.open("GET", "/data", true);
+        xhr.send();
+
+        var sensorTypes = {{ sensor_types|tojson }};
+        for (let i = 0; i < sensorTypes.length; i++) {
+            let sensorType = sensorTypes[i];
+            socket.on(`${sensorType}_data`, function(data) {
+                let sensorData = JSON.parse(data);
+                updateSensorData(sensorType, sensorData);
+            });
+        }
+    </script>
+</body>
+</html>

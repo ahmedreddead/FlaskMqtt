@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 50px;
+        }
+
+        .dashboard-partition {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 1px dashed #ccc;
+            text-align: center;
+            padding: 20px;
+            margin: 10px;
+        }
+
+        .dashboard-item {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ccc;
+            cursor: move;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="dashboard-partition" id="partition1"></div>
+        <div class="dashboard-partition" id="partition2"></div>
+        <div class="dashboard-partition" id="partition3"></div>
+        <div class="dashboard-partition" id="partition4"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $(".dashboard-item").draggable({
+                revert: "invalid",
+                zIndex: 100,
+                cursor: "move"
+            });
+
+            $(".dashboard-partition").droppable({
+                accept: ".dashboard-item",
+                drop: function(event, ui) {
+                    var draggable = ui.draggable;
+                    var droppable = $(this);
+                    var droppableItem = droppable.children(".dashboard-item");
+
+                    if (droppableItem.length > 0) {
+                        var draggableParent = draggable.parent();
+                        var droppableParent = droppableItem.parent();
+
+                        draggable.detach().appendTo(droppableParent);
+                        droppableItem.detach().appendTo(draggableParent);
+                    } else {
+                        if (!draggable.parent().is(droppable)) {
+                            draggable.detach().appendTo(droppable);
+                        }
+                    }
+
+                    draggable.css({ top: 0, left: 0 });
+                }
+            });
+        });
+
+        // Add initial items to their respective partitions
+        var initialItems = [
+            { text: "Item 1", partition: "#partition1" },
+            { text: "Item 2", partition: "#partition2" },
+            { text: "Item 3", partition: "#partition3" },
+            { text: "Item 4", partition: "#partition4" }
+  
+        ];
+
+        initialItems.forEach(function(item) {
+            var element = $('<div class="dashboard-item">' + item.text + '</div>');
+            $(item.partition).append(element);
+        });
+    </script>
+</body>
+</html>
