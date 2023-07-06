@@ -26,7 +26,7 @@
             height: {{ partition_height }}px; /* Replace with Flask variable */
             /*border: 1px dashed #ccc;*/
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             margin: {{ padding/2 }}px; /* Replace with Flask variable */
         }
 
@@ -41,31 +41,49 @@
         }
 
         #okButton {
-            display: none; /* Hide the OK button initially */
-                            position: fixed;
-    bottom: 20px;
-    left: 80px;
-    width: 30px;
-    height: 30px;
-    background-color: #6FABF0;
-    border-radius: 40%;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-        }
-        #editButton{
-                position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 50px;
-    height: 50px;
-    background-color: #6FABF0;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-        }
+  position: fixed;
+  bottom: 20px;
+  left: 80px;
+  width: 50px;
+  height: 50px;
+  background-color: #6FABF0;
+  border-radius: 50%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add a subtle box shadow */
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+
+  /* Add a gradient background */
+  background-image: linear-gradient(to bottom, #6FABF0, #357AE8);
+}
+
+#okButton:hover {
+  background-color: #357AE8; /* Change the background color on hover */
+}
+        #editButton {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #6FABF0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add a subtle box shadow */
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
+
+  /* Add a gradient background */
+  background-image: linear-gradient(to bottom, #6FABF0, #357AE8);
+}
+
+#editButton:hover {
+  background-color: #357AE8; /* Change the background color on hover */
+}
         
     </style>
     <link rel="stylesheet" type="text/css" href="static/css/dashboard.css">
@@ -117,6 +135,34 @@
             <option value="wifi">Wi-Fi</option>
         </select>
         <button id="add-item-confirm" class="btn btn-primary">Add</button>
+        
+        
+        
+        <div id="keypad" class="keypad">
+  <div class="keypad-row">
+    <div class="key keypad-key" >1</div>
+    <div class="key keypad-key" >2</div>
+    <div class="key keypad-key" >3</div>
+  </div>
+  <div class="keypad-row">
+    <div class="key keypad-key" >4</div>
+    <div class="key keypad-key" >5</div>
+    <div class="key keypad-key" >6</div>
+  </div>
+  <div class="keypad-row">
+    <div class="key keypad-key" >7</div>
+    <div class="key keypad-key" >8</div>
+    <div class="key keypad-key" >9</div>
+  </div>
+  <div class="keypad-row">
+    <div class="key keypad-key delete" >Delete</div>
+    <div class="key keypad-key" >0</div>
+  </div>
+</div>
+
+        
+        
+        
     </div>
 </div>
     <button id="editButton">Edit</button>
@@ -598,10 +644,44 @@ function getRandomPosition(min, max) {
   addConfirmButton.addEventListener('click', additem);
         
         
-        
-        
-        
-        
+    
+const itemIDInput = document.getElementById('item-id');
+const keypad = document.getElementById('keypad');
+const keypadKeys = keypad.querySelectorAll('.key');
+
+itemIDInput.addEventListener('focus', showKeypad);
+itemIDInput.addEventListener('blur', hideKeypad);
+
+keypadKeys.forEach((key) => {
+  key.addEventListener('click', handleKeypadKey);
+});
+
+function showKeypad() {
+  keypad.style.display = 'block';
+}
+
+function hideKeypad() {
+  keypad.style.display = 'block';
+}
+
+function handleKeypadKey(event) {
+  const key = event.target;
+  const digit = key.textContent;
+
+  if (digit === 'Delete') {
+    deleteDigit();
+  } else {
+    appendDigit(digit);
+  }
+}
+
+function appendDigit(digit) {
+  itemIDInput.value += digit;
+}
+
+function deleteDigit() {
+  itemIDInput.value = itemIDInput.value.slice(0, -1);
+}     
         
     </script>
 </body>

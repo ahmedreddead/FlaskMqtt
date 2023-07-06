@@ -1,11 +1,11 @@
-body {
+        body {
   margin: 0;
   padding: 0;
   background-color: #f2f2f2; /* Set the background color to the color of the paper */
-animation: shinyAnimation 5s ease-in-out infinite;
+animation: shinyAnimation 3s ease-in-out infinite;
 }
 
-@keyframes shinyAnimation {
+        @keyframes shinyAnimation {
   0% {
     background-color: #f2f2f2 ; /* Baby blue */
     box-shadow: 0 0 20px #add8e6; /* Add a subtle shadow for a shiny effect */
@@ -20,7 +20,7 @@ animation: shinyAnimation 5s ease-in-out infinite;
   }
 }
 
-.network-animation {
+        .network-animation {
   position: fixed;
   top: 0;
   left: 0;
@@ -28,13 +28,13 @@ animation: shinyAnimation 5s ease-in-out infinite;
   height: 80%;
 }
 
-.circle {
+        .circle {
   fill: gray; /* Gray color */
   opacity: 0.5;
   animation: networkAnimation 10s linear infinite;
 }
-
-@keyframes networkAnimation {
+    
+        @keyframes networkAnimation {
   0% {
     transform: translate(0, 0);
   }
@@ -52,27 +52,27 @@ animation: shinyAnimation 5s ease-in-out infinite;
   }
 }
 
-.line {
+        .line {
   stroke: gray; /* Gray color for the lines */
   opacity: 0.5;
   stroke-width: 0.5px;
 }
         .top-bar {
             background-color: black;
-            height: 50px;
+            height: 60px;
             display: flex;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 10px;
         }
 
         .logo {
             width: 50px;
-            height: 45px;
+            height: 50px;
             background-image:url("../photo/micropolis.png");
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            margin-right: 10px;
+            margin-left: 15px;
         }
 
         #data {
@@ -109,8 +109,8 @@ animation: shinyAnimation 5s ease-in-out infinite;
             align-items: center;
             padding: 10px;
         }
-.sensor:hover,
-.actuator:hover {
+        .sensor:hover,
+        .actuator:hover {
   background-color: #C1D9F3; /* Baby blue color for hover */
 }
 
@@ -176,7 +176,8 @@ animation: shinyAnimation 5s ease-in-out infinite;
         .actuator-icon-off {
             color: black;
         }
-            .modal {
+
+        .modal {
         display: none;
         position: fixed;
         z-index: 1;
@@ -188,7 +189,7 @@ animation: shinyAnimation 5s ease-in-out infinite;
         background-color: rgba(0, 0, 0, 0.4);
     }
 
-    .modal-content {
+        .modal-content {
         background-color: #fefefe;
         margin: 15% auto;
         padding: 20px;
@@ -196,7 +197,7 @@ animation: shinyAnimation 5s ease-in-out infinite;
         width: 400px;
     }
 
-    .close {
+        .close {
         color: #aaa;
         float: right;
         font-size: 28px;
@@ -204,37 +205,46 @@ animation: shinyAnimation 5s ease-in-out infinite;
         cursor: pointer;
     }
 
-    .close:hover,
-    .close:focus {
+        .close:hover,
+        .close:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
     }
-  .add-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    background-color: #6FABF0;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
+        .add-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #6FABF0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add a subtle box shadow */
+  transition: background-color 0.3s ease; /* Add a smooth transition effect */
 
-  .plus-icon {
+  /* Add a gradient background */
+  background-image: linear-gradient(to bottom, #6FABF0, #357AE8);
+}
+
+.add-button:hover {
+  background-color: #357AE8; /* Change the background color on hover */
+}
+
+        .plus-icon {
     color: white;
     font-size: 24px;
   }
-  .delete-button {
+        .delete-button {
   position: absolute;
   display: none;
   top: 0;
   right: 0;
 }
-#loading-div {
+        #loading-div {
   display: none;
   position: fixed;
   top: 0;
@@ -245,7 +255,7 @@ animation: shinyAnimation 5s ease-in-out infinite;
   z-index: 9999;
 }
 
-.loader {
+        .loader {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -258,11 +268,11 @@ animation: shinyAnimation 5s ease-in-out infinite;
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
+        @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-.success-message {
+        .success-message {
   display: none;
   font-size: 18px;
   font-weight: bold;
@@ -271,14 +281,36 @@ animation: shinyAnimation 5s ease-in-out infinite;
   border: 1px solid;
 }
 
-.success {
+        .success {
   color: green;
   background-color: #eaffea;
   border-color: #8bc78b;
 }
 
-.error {
+        .error {
   color: red;
   background-color: #ffeaea;
   border-color: #c78b8b;
+}
+
+
+
+.keypad {
+  display: none;
+}
+
+.keypad-row {
+  display: flex;
+  justify-content: center;
+}
+
+.key {
+  width: 60px;
+  height: 60px;
+  border: 8px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin: 4px;
 }

@@ -324,12 +324,11 @@ def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
 
-
     count = session.get('count')
     partition_width  = 200
     partition_height = 200
 
-    padding = 60
+    padding = 50
     numPerRow = 4
     numItems = ( count // numPerRow )+ 1
     len_items = count  # Replace with the actual number of items
