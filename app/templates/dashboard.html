@@ -42,6 +42,29 @@
 
         #okButton {
             display: none; /* Hide the OK button initially */
+                            position: fixed;
+    bottom: 20px;
+    left: 80px;
+    width: 30px;
+    height: 30px;
+    background-color: #6FABF0;
+    border-radius: 40%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+        }
+        #editButton{
+                position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #6FABF0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
         }
         
     </style>
@@ -107,8 +130,8 @@
     <script>
 // Generate 50 circles with random positions
 const svg = document.querySelector('.network-animation');
-const circles = [];
 const numCircles = 10;
+const circles = [];
 
 for (let i = 0; i < numCircles; i++) {
   const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -121,36 +144,25 @@ for (let i = 0; i < numCircles; i++) {
 }
 
 // Generate lines connecting circles
-for (let i = 0; i < numCircles; i++) {
-  const connections = [];
+const numLines = 5;
 
-  // Input connection
-  if (i > 0) {
-    connections.push(i - 1);
-  }
+for (let i = 0; i < numLines; i++) {
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('class', 'line');
 
-  // Output connection
-  if (i < numCircles - 1) {
-    connections.push(i + 1);
-  }
+  const startCircleIndex = getRandomIndex(numCircles);
+  const endCircleIndex = getRandomIndex(numCircles, [startCircleIndex]);
 
-  // Random connection
-  const randomIndex = getRandomIndex(numCircles, [i, i - 1, i + 1]);
-  connections.push(randomIndex);
+  line.setAttribute('x1', circles[startCircleIndex].getAttribute('cx'));
+  line.setAttribute('y1', circles[startCircleIndex].getAttribute('cy'));
+  line.setAttribute('x2', circles[endCircleIndex].getAttribute('cx'));
+  line.setAttribute('y2', circles[endCircleIndex].getAttribute('cy'));
 
-  for (const connectionIndex of connections) {
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('class', 'line');
-    line.setAttribute('x1', circles[i].getAttribute('cx'));
-    line.setAttribute('y1', circles[i].getAttribute('cy'));
-    line.setAttribute('x2', circles[connectionIndex].getAttribute('cx'));
-    line.setAttribute('y2', circles[connectionIndex].getAttribute('cy'));
-    svg.appendChild(line);
-  }
+  svg.appendChild(line);
 }
 
 // Random number generator function (excluding excludedIndices)
-function getRandomIndex(max, excludedIndices) {
+function getRandomIndex(max, excludedIndices = []) {
   let index;
   do {
     index = Math.floor(Math.random() * max);
