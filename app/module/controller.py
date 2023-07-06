@@ -34,19 +34,19 @@ host = '10.20.0.183'
 @app.route('/process_locations', methods=['POST'])
 def process_locations():
     item_locations = request.get_json()
-    dashboard_id = session['dashboard_id']
-    user_id = session.get('user_id')
     # Process the item locations as needed
     # Here, we simply print the item locations and return them as JSON response
-    print(item_locations)
     session['item_locations'] = item_locations
+    update_process_location(item_locations)
 
-    print(type(item_locations))
+
+    return jsonify(item_locations)
+
+def update_process_location (item_locations) :
     object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
     object.connect()
-    object.insert_positions_into_dashboard(item_locations,dashboard_id,user_id)
+    object.insert_positions_into_dashboard(item_locations,session['dashboard_id'],session.get('user_id'))
     object.disconnect()
-    return jsonify(item_locations)
 
 @app.route('/add-item', methods=['POST'])
 def add_item():
@@ -219,16 +219,47 @@ def handle_connect():
 
 def check_session_parameters() :
     # Access session in the WebSocket connection
-    if 'user_id' not in session :
+    if 'user_id' not in session or 'dashboard_id' not in session:
         return redirect(url_for('login'))
-    if 'dashboard_id' not in session :
-        return redirect(url_for('login'))
+
+    session['sensor_counts'] = get_data_From_dashboard()
     if 'first_load' not in session:  # Check if it's the first client connection
         session['first_load'] = False
-    if 'item_locations' not in session :
-        session['item_locations'] = get_items_locations()
-    if 'count' not in session :
-        session['count'] = len(get_items_locations())
+
+
+    session['item_locations'] = get_items_locations()
+    if not session['item_locations'] :
+            counter = 0
+            items = []
+            for x in session['sensor_counts'].keys():
+                for n in session['sensor_counts'][x]:
+                    items.append({'itemId': n, 'partitionId': 'partition-' + str(counter), 'type': str(x)})
+                    counter +=1
+            session['item_locations'] = items
+            update_process_location(session['item_locations'])
+
+    session['count'] = len(session['item_locations'])
+
+
+    max_partition = max(int(d['partitionId'].split('-')[1]) for d in session['item_locations'])
+    print(max_partition)
+    sensor_counts = session['sensor_counts']
+    item_locations = session['item_locations']
+    list_of_ids = []
+    list_of_typeids = []
+    for dic in item_locations :
+        list_of_ids.append(dic['itemId'])
+        list_of_typeids.append(dic['type'])
+    #and list_of_typeids[list_of_ids.index(id)] == type
+    for type in sensor_counts.keys():
+        for id in sensor_counts[type]:
+            if id not in list_of_ids  :
+                max_partition += 1
+                session['item_locations'].append({'itemId': id, 'partitionId': 'partition-' + str(max_partition), 'type': str(type)})
+                update_process_location(session['item_locations'])
+                session['count'] +=1
+
+
 
 
 def get_items_locations () :
@@ -236,6 +267,7 @@ def get_items_locations () :
     object.connect()
     result = object.get_positions(session.get('user_id'),session.get('dashboard_id'))
     object.disconnect()
+    result = sorted(result, key=lambda x: int(x['partitionId'].split('-')[1]))
     return result
 
 @app.route('/')
@@ -322,10 +354,9 @@ def dashboard():
     partition_width  = 200
     partition_height = 200
     padding = 60
-    numPerRow = 5
-    numItems = count // 4
-    if type(count / 2) == float :
-        numItems+= 1
+    numPerRow = 4
+    numItems = count // 4 + 1
+
     len_items = count  # Replace with the actual number of items
     #print(items)
     #print(sensor_counts)
