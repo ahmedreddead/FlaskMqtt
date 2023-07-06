@@ -29,6 +29,10 @@ page_loaded = False
 #item_locations = [1,2,2,3]  # Default locations
 
 host = '10.20.0.183'
+def create_database_object () :
+    object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
+    object.connect()
+    return  object
 
 
 @app.route('/process_locations', methods=['POST'])
@@ -37,16 +41,14 @@ def process_locations():
     # Process the item locations as needed
     # Here, we simply print the item locations and return them as JSON response
     session['item_locations'] = item_locations
-    update_process_location(item_locations)
-
+    object = create_database_object()
+    update_process_location(item_locations,object)
+    object.disconnect()
 
     return jsonify(item_locations)
 
-def update_process_location (item_locations) :
-    object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
-    object.connect()
+def update_process_location (item_locations,object) :
     object.insert_positions_into_dashboard(item_locations,session['dashboard_id'],session.get('user_id'))
-    object.disconnect()
 
 @app.route('/add-item', methods=['POST'])
 def add_item():
@@ -153,9 +155,7 @@ def get_data_database ():
 
     return sensor_counts
 
-def get_data_From_dashboard():
-    object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
-    object.connect()
+def get_data_From_dashboard(object):
     user_id = session.get('user_id') # Assuming user ID is 1, replace with the actual user ID retrieval logic
     sensor_counts = {key: [] for key in sensor_types}
     # Query to retrieve sensor and actuator data from the first dashboard
@@ -219,15 +219,15 @@ def handle_connect():
 
 def check_session_parameters() :
     # Access session in the WebSocket connection
+    if 'first_load' not in session:  # Check if it's the first client connection
+        session['first_load'] = False
     if 'user_id' not in session or 'dashboard_id' not in session:
         return redirect(url_for('login'))
 
-    session['sensor_counts'] = get_data_From_dashboard()
-    if 'first_load' not in session:  # Check if it's the first client connection
-        session['first_load'] = False
 
-
-    session['item_locations'] = get_items_locations()
+    object = create_database_object()
+    session['sensor_counts'] = get_data_From_dashboard(object)
+    session['item_locations'] = get_items_locations(object)
     if not session['item_locations'] :
             counter = 0
             items = []
@@ -236,13 +236,12 @@ def check_session_parameters() :
                     items.append({'itemId': n, 'partitionId': 'partition-' + str(counter), 'type': str(x)})
                     counter +=1
             session['item_locations'] = items
-            update_process_location(session['item_locations'])
+            update_process_location(session['item_locations'],object)
 
     session['count'] = len(session['item_locations'])
 
 
     max_partition = max(int(d['partitionId'].split('-')[1]) for d in session['item_locations'])
-    print(max_partition)
     sensor_counts = session['sensor_counts']
     item_locations = session['item_locations']
     list_of_ids = []
@@ -256,17 +255,13 @@ def check_session_parameters() :
             if id not in list_of_ids  :
                 max_partition += 1
                 session['item_locations'].append({'itemId': id, 'partitionId': 'partition-' + str(max_partition), 'type': str(type)})
-                update_process_location(session['item_locations'])
+                update_process_location(session['item_locations'],object)
                 session['count'] +=1
 
-
-
-
-def get_items_locations () :
-    object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
-    object.connect()
-    result = object.get_positions(session.get('user_id'),session.get('dashboard_id'))
     object.disconnect()
+
+def get_items_locations (object) :
+    result = object.get_positions(session.get('user_id'),session.get('dashboard_id'))
     result = sorted(result, key=lambda x: int(x['partitionId'].split('-')[1]))
     return result
 
@@ -331,37 +326,15 @@ def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    '''
-    count = 0
-    sensor_counts = session.get('sensor_counts', False)
-    items = session.get('item_locations', False)
 
-    if not items :
-        items = get_items_locations()
-        print(items)
-
-        items = []
-        for x in sensor_counts.keys():
-            for n in sensor_counts[x]:
-                items.append({'itemId': n , 'partitionId': 'partition-'+str(count) , 'type' : str(x) })
-        
-    if sensor_counts :
-        for x in sensor_counts.keys():
-            for n in sensor_counts[x]:
-                count += 1
-    '''
     count = session.get('count')
     partition_width  = 200
     partition_height = 200
+
     padding = 60
     numPerRow = 4
-    numItems = count // 4 + 1
-
+    numItems = ( count // numPerRow )+ 1
     len_items = count  # Replace with the actual number of items
-    #print(items)
-    #print(sensor_counts)
-    #session['item_locations']= items
-    #print(session['item_locations'])
 
 
     if 'username' in session:
