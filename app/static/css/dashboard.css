@@ -1,9 +1,62 @@
 body {
-            background-image: url('../5630974.jpg');
-            background-size: cover;
-            margin: 0;
-        }
+  margin: 0;
+  padding: 0;
+  background-color: #f2f2f2; /* Set the background color to the color of the paper */
+animation: shinyAnimation 5s ease-in-out infinite;
+}
 
+@keyframes shinyAnimation {
+  0% {
+    background-color: #f2f2f2 ; /* Baby blue */
+    box-shadow: 0 0 20px #add8e6; /* Add a subtle shadow for a shiny effect */
+  }
+  50% {
+    background-color: rgba(216, 234, 255, 0.3); /* Light blue */
+    box-shadow: 0 0 20px #add8e6;
+  }
+  100% {
+    background-color: #f2f2f2 ; /* Baby blue */
+    box-shadow: 0 0 20px #add8e6;
+  }
+}
+
+.network-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.circle {
+  fill: gray; /* Gray color */
+  opacity: 0.5;
+  animation: networkAnimation 10s linear infinite;
+}
+
+@keyframes networkAnimation {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(50px, 50px);
+  }
+  50% {
+    transform: translate(-50px, -50px);
+  }
+  75% {
+    transform: translate(-50px, 50px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+.line {
+  stroke: gray; /* Gray color for the lines */
+  opacity: 0.5;
+  stroke-width: 0.5px;
+}
         .top-bar {
             background-color: black;
             height: 50px;
@@ -33,7 +86,9 @@ body {
             width: 200px;
             height: 200px;
             margin: 3px;
-            background-color: rgba(249, 249, 249, 0.3);
+            /*background-color: rgba(249, 249, 249, 0.3);*/
+            background-color: #f2f2f2; /* Set the background color to the color of the paper */
+
             border-radius: 10px;
             display: flex;
             flex-direction: column;
@@ -45,7 +100,8 @@ body {
             width: 200px;
             height: 200px;
             margin: 3px;
-            background-color: rgba(249, 249, 249, 0.3);
+            /*background-color: rgba(249, 249, 249, 0.3);*/
+            background-color: #f2f2f2;
             border-radius: 10px;
             display: flex;
             flex-direction: column;
@@ -53,6 +109,10 @@ body {
             align-items: center;
             padding: 10px;
         }
+.sensor:hover,
+.actuator:hover {
+  background-color: #C1D9F3; /* Baby blue color for hover */
+}
 
         .sensor-name,
         .actuator-name {
@@ -156,7 +216,7 @@ body {
     right: 20px;
     width: 50px;
     height: 50px;
-    background-color: blue;
+    background-color: #6FABF0;
     border-radius: 50%;
     display: flex;
     justify-content: center;

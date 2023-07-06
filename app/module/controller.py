@@ -26,14 +26,12 @@ sensor_types = ['temperature', 'humidity', 'motion_sensor', 'door_sensor', 'glas
 sensor_counts = {}
 is_first_load = True
 page_loaded = False
-#item_locations = [1,2,2,3]  # Default locations
 
 host = '10.20.0.183'
 def create_database_object () :
     object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
     object.connect()
     return  object
-
 
 @app.route('/process_locations', methods=['POST'])
 def process_locations():

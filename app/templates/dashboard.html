@@ -49,6 +49,12 @@
 
 </head>
 <body>
+
+<svg class="network-animation" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+
+    <!-- Add more circles as needed -->
+  </svg>
+
     <div class="top-bar">
         <div class="logo"></div>
         <!-- Add other elements or text in the top bar if needed -->
@@ -99,6 +105,63 @@
 
     
     <script>
+// Generate 50 circles with random positions
+const svg = document.querySelector('.network-animation');
+const circles = [];
+const numCircles = 10;
+
+for (let i = 0; i < numCircles; i++) {
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('class', 'circle');
+  circle.setAttribute('r', '5');
+  circle.setAttribute('cx', getRandomPosition(0, 1000));
+  circle.setAttribute('cy', getRandomPosition(0, 1000));
+  svg.appendChild(circle);
+  circles.push(circle);
+}
+
+// Generate lines connecting circles
+for (let i = 0; i < numCircles; i++) {
+  const connections = [];
+
+  // Input connection
+  if (i > 0) {
+    connections.push(i - 1);
+  }
+
+  // Output connection
+  if (i < numCircles - 1) {
+    connections.push(i + 1);
+  }
+
+  // Random connection
+  const randomIndex = getRandomIndex(numCircles, [i, i - 1, i + 1]);
+  connections.push(randomIndex);
+
+  for (const connectionIndex of connections) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', 'line');
+    line.setAttribute('x1', circles[i].getAttribute('cx'));
+    line.setAttribute('y1', circles[i].getAttribute('cy'));
+    line.setAttribute('x2', circles[connectionIndex].getAttribute('cx'));
+    line.setAttribute('y2', circles[connectionIndex].getAttribute('cy'));
+    svg.appendChild(line);
+  }
+}
+
+// Random number generator function (excluding excludedIndices)
+function getRandomIndex(max, excludedIndices) {
+  let index;
+  do {
+    index = Math.floor(Math.random() * max);
+  } while (excludedIndices.includes(index));
+  return index;
+}
+
+// Random number generator function
+function getRandomPosition(min, max) {
+  return Math.floor(Math.random() * (max - min) + min);
+}
         var isEditMode = false; // Variable to track if the dashboard is in edit mode
         var itemLocations = [];
         
@@ -236,6 +299,8 @@
                     return '<i class="fa fa-thermometer-half sensor-icon"></i>';
                 case 'humidity':
                     return '<i class="fa fa-tint sensor-icon"></i>';
+                case 'glass_break':
+                    return '<img src="static/photo/broken-window.png" class="sensor-icon"  width="140" height="140">';
                 case 'motion_sensor':
                     if (sensorStatus === 'No Motion') {
                         return '<img src="static/photo/motionno.png" class="sensor-icon"  width="140" height="140">';
@@ -388,7 +453,19 @@
             if (location.type === 'siren' || location.type === 'switch') {
                 icon = getActuatorIcon(location.type, 'off');
             } else {
-                icon = getSensorIcon(location.type, 'opened');
+                if (location.type === 'door_sensor')
+                    {
+                        icon = getSensorIcon(location.type, 'opened');
+                    }
+                else if (location.type === 'motion_sensor')
+                    {
+                        icon = getSensorIcon(location.type, 'No Motion');
+                    }
+                else {
+                        icon = getSensorIcon(location.type, 'No Motion');
+
+                }
+                
             }
 
             if (location.type === 'siren' || location.type === 'switch') {
