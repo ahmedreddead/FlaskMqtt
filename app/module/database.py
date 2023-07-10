@@ -107,6 +107,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_glass_sensor_reading(self,sensorid,status,datetime):
         try:
             cursor = self.connection.cursor()
@@ -117,6 +118,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_motion_sensor_reading(self,sensorid,status,datetime):
         try:
             cursor = self.connection.cursor()
@@ -127,6 +129,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_polution_sensor_reading(self,sensorid,polution,datetime):
         try:
             cursor = self.connection.cursor()
@@ -137,6 +140,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_power_reading(self,power,datetime):
         try:
             cursor = self.connection.cursor()
@@ -147,6 +151,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_relay_switch_reading(self,actuatorid,status,datetime):
         try:
             cursor = self.connection.cursor()
@@ -206,6 +211,7 @@ class Database :
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
             return error
+
     def insert_actuators_to_dashboard (self,dashboard_id , actuators_id):
         try:
             cursor = self.connection.cursor()
@@ -270,7 +276,6 @@ class Database :
             print("Failed to insert into MySQL table {}".format(error))
             return error
 
-
     def get_positions(self,user_id, dashboard_id):
         try:
             cursor = self.connection.cursor()
@@ -294,4 +299,61 @@ class Database :
             return data
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
+            return error
+
+    def delete_sensor(self, sensorid, type):
+        try:
+            cursor = self.connection.cursor()
+            print(sensorid)
+            print(type)
+            sensorid = str(sensorid)
+
+            # Delete from dashboard_items
+            command = """DELETE FROM dashboard_items WHERE item_id = %s"""
+            cursor.execute(command, (sensorid,))
+
+            # Delete from dashboard_sensors
+            command = """DELETE FROM dashboard_sensors WHERE sensor_id = %s"""
+            cursor.execute(command, (sensorid,))
+
+            # Delete from sensor data table
+            command = f"DELETE FROM {type} WHERE sensorid = %s"
+            cursor.execute(command, (sensorid,))
+
+            # Delete from sensors table
+            command = """DELETE FROM sensors WHERE sensorid = %s"""
+            cursor.execute(command, (sensorid,))
+
+            self.connection.commit()
+        except mysql.connector.Error as error:
+            print("Failed to delete from MySQL table: {}".format(error))
+            return error
+
+
+    def delete_actuator(self, actuatorid, type):
+        try:
+            cursor = self.connection.cursor()
+            print(actuatorid)
+            print(type)
+            actuatorid = str(actuatorid)
+
+            # Delete from dashboard_items
+            command = """DELETE FROM dashboard_items WHERE item_id = %s"""
+            cursor.execute(command, (actuatorid,))
+
+            # Delete from dashboard_actuators
+            command = """DELETE FROM dashboard_actuators WHERE actuator_id = %s"""
+            cursor.execute(command, (actuatorid,))
+
+            # Delete from sensor data table
+            command = f"DELETE FROM {type} WHERE actuatorid = %s"
+            cursor.execute(command, (actuatorid,))
+
+            # Delete from sensors table
+            command = """DELETE FROM actuators WHERE actuatorid = %s"""
+            cursor.execute(command, (actuatorid,))
+
+            self.connection.commit()
+        except mysql.connector.Error as error:
+            print("Failed to delete from MySQL table: {}".format(error))
             return error

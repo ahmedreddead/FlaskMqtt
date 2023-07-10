@@ -109,11 +109,16 @@
     <div id="add-item-modal" class="modal">
 
     <div class="modal-content">
+                
+        
         <div id="loading-div">
             <div class="loader"></div>
         </div>
         <div id="success-message" class="success-message success">Item added successfully</div>
         <div id="error-message" class="success-message error">Item addition failed</div>
+        
+        <div id="success-delete" class="success-message success-delete">Item deleted successfully</div>
+        <div id="error-delete" class="success-message error-delete">Item deleted failed</div>
 
         <span class="close">&times;</span>
         <h2>Add Item</h2>
@@ -160,8 +165,10 @@
   </div>
 </div>
 
-        
-        
+        <h3>Delete Item</h3>
+        <select id="item-list" class="form-control"></select>
+        <button id="delete-item" class="btn btn-danger">Delete Item</button>
+                
         
     </div>
 </div>
@@ -681,8 +688,91 @@ function appendDigit(digit) {
 
 function deleteDigit() {
   itemIDInput.value = itemIDInput.value.slice(0, -1);
-}     
+}
         
+        
+        
+function displayItemList(itemLocations) {
+  const itemList = document.getElementById("item-list");
+  itemList.innerHTML = ""; // Clear previous options
+
+  itemLocations.forEach((item) => {
+    const option = document.createElement("option");
+    option.value = [item.itemId ,item.type  ] ;
+    option.textContent = item.type +"   "+ item.itemId;
+    itemList.appendChild(option);
+  });
+}
+
+// Function to handle item deletion
+function deleteItem() {
+  const selectedItem = document.getElementById("item-list").value;
+    
+    
+  document.getElementById("loading-div").style.display = "block";
+  var successMessage = document.getElementById("success-delete");
+
+  
+  // Simulate a delay (replace this with your actual request logic)
+  
+  // Get the values of the sensor attributes
+  var type = document.getElementById('item-type').value;
+  var id = document.getElementById('item-id').value;
+  var protocol = document.getElementById('item-protocol').value;
+  if (!selectedItem) {
+    alert("Please select an item to delete");
+    return;
+  }
+
+  // Make an AJAX request to the server to delete the item
+  const deleteItemURL = "/delete-item"; // Replace with the actual URL endpoint for deleting an item in your Flask application
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", deleteItemURL);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      // Item deleted successfully
+      //alert("Item deleted successfully");
+      displayItemList(itemLocations); // Refresh the item list
+        
+        document.getElementById("loading-div").style.display = "none";
+        successMessage.style.display = "block";
+        var response = JSON.parse(xhr.responseText);
+        console.log(response);
+        var addItemModal = document.getElementById('add-item-modal');
+        setTimeout(function() {
+        successMessage.style.display = "none";
+        addItemModal.style.display = 'none';
+        }, 3000);
+
+        
+        setTimeout(function() {
+        location.reload();
+        }, 5000);
+    } else {
+        // Item not added successfully
+        document.getElementById("loading-div").style.display = "none";
+        var errorMessage = document.getElementById("error-delete");
+        errorMessage.style.display = "block";
+
+        console.log('Item not added successfully');
+        var addItemModal = document.getElementById('add-item-modal');
+        setTimeout(function() {
+        errorMessage.style.display = "none";
+        addItemModal.style.display = 'none';
+        }, 5000);
+        
+      }
+  };
+  xhr.send(JSON.stringify({ deletedItem: selectedItem }));
+}
+
+// Add click event listener to the delete button
+const deleteButton = document.getElementById("delete-item");
+deleteButton.addEventListener("click", deleteItem);
+        
+        
+displayItemList(itemLocations);
     </script>
 </body>
 </html>

@@ -124,6 +124,28 @@ def add_item():
         response = {'message': 'item Failed to add '}
         return jsonify(response), 404
 
+@app.route('/delete-item',methods =['POST'])
+def delete_item () :
+    item_data = request.json
+    print(type(item_data))
+    print(item_data)
+    deleted_item_id , deleted_item_type = str (item_data['deletedItem']).split(',')
+    object= create_database_object()
+
+    if deleted_item_type == 'siren' or deleted_item_type == 'switch' :
+        if deleted_item_type == 'switch' :
+            deleted_item_type = ' relay_switch'
+        status = object.delete_actuator(deleted_item_id,deleted_item_type)
+    else:
+        status = object.delete_sensor(deleted_item_id,deleted_item_type)
+
+    if status :
+        response = {'message': 'item not added '}
+        return jsonify(response), 404
+    else:
+        response = {'message': 'item added '}
+        return jsonify(response), 200
+
 @app.before_request
 def check_first_load():
     pass

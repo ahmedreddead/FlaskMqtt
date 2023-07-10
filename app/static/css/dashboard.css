@@ -294,6 +294,19 @@ animation: shinyAnimation 3s ease-in-out infinite;
 }
 
 
+        .success-delete {
+  color: green;
+  background-color: #eaffea;
+  border-color: #8bc78b;
+}
+
+        .error-delete {
+  color: red;
+  background-color: #ffeaea;
+  border-color: #c78b8b;
+}
+
+
 
 .keypad {
   display: none;
@@ -313,4 +326,8 @@ animation: shinyAnimation 3s ease-in-out infinite;
   align-items: center;
   cursor: pointer;
   margin: 4px;
+}
+
+li.selected {
+  background-color: lightgray;
 }
