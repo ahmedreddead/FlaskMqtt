@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 from flask import render_template, request, jsonify
@@ -22,12 +23,14 @@ app.config['SECRET_KEY'] = 'your_secret_key_here'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # Set session duration (e.g., 7 days)
 mqtt = Mqtt(app)
 sensor_data = {}
-sensor_types = ['temperature', 'humidity', 'motion_sensor', 'door_sensor', 'glass_break' ,'switch', 'siren']
+sensor_types = [ 'temperature', 'humidity', 'motion_sensor', 'door_sensor', 'glass_break' ,'switch', 'siren' ]
 sensor_counts = {}
 is_first_load = True
 page_loaded = False
 
 host = '10.20.0.183'
+
+
 def create_database_object () :
     object = database.Database(host, 3306, "grafana", "pwd123", "grafanadb")
     object.connect()
@@ -183,7 +186,8 @@ def get_data_From_dashboard(object):
     # Format the results as a list of dictionaries
     data = [{'id': row[0], 'name': row[1]} for row in result]
     for row in data:
-        sensor_counts[row['name']].append(row['id'])
+        if row['name'] != 'temp' :
+            sensor_counts[row['name']].append(row['id'])
     sensor_counts = {key: value for key, value in sensor_counts.items() if value}
     print(sensor_counts)
     session["sensor_counts"] = sensor_counts
@@ -355,7 +359,6 @@ def dashboard():
     numItems = ( count // numPerRow )+ 1
     len_items = count  # Replace with the actual number of items
 
-
     if 'username' in session:
         # User is already logged in, render the user page
         return render_template('dashboard.html',item_locations=session['item_locations'],len_items=len_items, num_items=numItems, items_flask=session['item_locations'], username=session['username'], partition_width=partition_width,partition_height=partition_height,padding=padding , num_per_row =numPerRow )
@@ -388,3 +391,49 @@ def handle_actuator_command(data):
     actuator_id = data['id']
     actuator_value = data['value']
     mqtt.publish(f'micropolis/{actuator_type}/{actuator_id}', actuator_value)
+
+
+def do_action (action_id, object ) :
+    actons = object.get_actions(action_id)
+    list_of_actions = []
+    for i in actons.keys() :
+        for value in actons[i] :
+            if i =='time' :
+                sec , order = value
+                list_of_actions.insert(order-1,(i , sec))
+            else:
+                id , status , order = value
+                list_of_actions.insert(order-1 ,(i , id, status) )
+
+
+    for tuple in list_of_actions :
+        if tuple[0] == 'siren' or tuple[0] == 'switch' :
+            data = { 'type' : tuple[0] , 'id' : tuple[1] , 'value' : tuple[2]}
+            handle_actuator_command(data)
+        else:
+            time.sleep(int (tuple[1]) )
+
+def do_action_thread(action_id):
+    # Perform the necessary action
+    do_action(action_id, create_database_object())
+# Function to check for new rows periodically
+def check_push_alerts():
+    while True:
+        try:
+            object = create_database_object()
+            rows = object.get_push_alert()
+            if rows :
+                for row in rows:
+                    event_id, action_id = row
+                    t = threading.Thread(target=do_action_thread, args=(action_id,))
+                    t.start()
+                    #do_action(action_id, object)
+                    object.delete_push_alert(action_id)
+            object.disconnect()
+
+        except Exception as e:
+            print("Error in push alerts:", e)
+            object = create_database_object()
+
+
+

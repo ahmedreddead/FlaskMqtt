@@ -31,15 +31,12 @@ class Database :
             if self.connection.is_connected():
                 db_Info = self.connection.get_server_info()
                 print("Connected to MySQL Server version ", db_Info)
-                cursor = self.connection.cursor()
-                cursor.execute("select database();")
-                record = cursor.fetchone()
-                print("You're connected to database: ", record)
-                print(record)
-                cursor.close()
+
 
         except Error as e:
             print("Error while connecting to MySQL", e)
+    def is_connected (self) :
+        return self.connection.is_connected()
 
     def disconnect(self):
 
@@ -356,4 +353,63 @@ class Database :
             self.connection.commit()
         except mysql.connector.Error as error:
             print("Failed to delete from MySQL table: {}".format(error))
+            return error
+
+
+
+    def get_actions(self , action_id ):
+        try:
+            result = {}
+            cursor = self.connection.cursor()
+            # Check if the sensor ID already exists in the sensors table
+            select_query = """
+                SELECT siren_id, siren_status, order_number
+                FROM action_siren
+                WHERE action_id = %s 
+            """            # Execute the query and fetch the results
+            cursor.execute(select_query, (action_id,))
+            result['siren'] = cursor.fetchall()
+
+            select_query = """
+                SELECT switch_id, switch_status, order_number
+                FROM action_switch
+                WHERE action_id = %s 
+            """            # Execute the query and fetch the results
+            cursor.execute(select_query, (action_id,))
+            result['switch'] = cursor.fetchall()
+
+            select_query = """
+                SELECT duration , order_number
+                FROM delay 
+                WHERE action_id = %s 
+            """            # Execute the query and fetch the results
+            cursor.execute(select_query, (action_id,))
+            result['time']  = cursor.fetchall()
+
+            return result
+
+
+        except mysql.connector.Error as error:
+            print("Failed to insert into MySQL table {}".format(error))
+            return error
+
+    def get_push_alert(self, ):
+        try:
+            cursor = self.connection.cursor()
+            # Check if the sensor ID already exists in the sensors table
+            check_query = "SELECT event_id, action_id FROM push_alert"
+            cursor.execute(check_query)
+            result = cursor.fetchall()
+            return result
+        except mysql.connector.Error as error:
+            print("Failed to insert into MySQL table {}".format(error))
+            return error
+    def delete_push_alert(self, action_id):
+        try:
+            cursor = self.connection.cursor()
+            # Check if the sensor ID already exists in the sensors table
+            cursor.execute("DELETE FROM push_alert WHERE action_id = %s", (action_id,))
+            self.connection.commit()
+        except mysql.connector.Error as error:
+            print("Failed to insert into MySQL table {}".format(error))
             return error
