@@ -23,7 +23,7 @@ app.config['SECRET_KEY'] = 'your_secret_key_here'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=1)  # Set session duration (e.g., 7 days)
 mqtt = Mqtt(app)
 sensor_data = {}
-sensor_types = [ 'temperature', 'humidity', 'motion_sensor', 'door_sensor', 'glass_break' ,'switch', 'siren' ]
+sensor_types = [ 'temperature', 'humidity', 'motion_sensor', 'door_sensor', 'glass_break' ,'switch', 'siren']
 sensor_counts = {}
 is_first_load = True
 page_loaded = False
@@ -392,7 +392,6 @@ def handle_actuator_command(data):
     actuator_value = data['value']
     mqtt.publish(f'micropolis/{actuator_type}/{actuator_id}', actuator_value)
 
-
 def do_action (action_id, object ) :
     actons = object.get_actions(action_id)
     list_of_actions = []
@@ -404,7 +403,6 @@ def do_action (action_id, object ) :
             else:
                 id , status , order = value
                 list_of_actions.insert(order-1 ,(i , id, status) )
-
 
     for tuple in list_of_actions :
         if tuple[0] == 'siren' or tuple[0] == 'switch' :
@@ -427,13 +425,26 @@ def check_push_alerts():
                     event_id, action_id = row
                     t = threading.Thread(target=do_action_thread, args=(action_id,))
                     t.start()
-                    #do_action(action_id, object)
                     object.delete_push_alert(action_id)
             object.disconnect()
+            time.sleep(2)
 
         except Exception as e:
             print("Error in push alerts:", e)
             object = create_database_object()
+
+
+
+def create_event() :
+    dictionary =  [{'motion_sensor':'1213'},{'door_sensor' : '1212' , 'status' : 'on'}]
+    dictionary_action =  [{'siren' },{'door_sensor' : '1212' , 'status' : 'on'}]
+    object = create_database_object()
+    object.insert_event_motion(dictionary)
+
+
+
+def create_action():
+    pass
 
 
 

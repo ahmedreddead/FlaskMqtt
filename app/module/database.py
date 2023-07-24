@@ -30,7 +30,7 @@ class Database :
                                                  )
             if self.connection.is_connected():
                 db_Info = self.connection.get_server_info()
-                print("Connected to MySQL Server version ", db_Info)
+                #print("Connected to MySQL Server version ", db_Info)
 
 
         except Error as e:
@@ -42,7 +42,7 @@ class Database :
 
             if self.connection.is_connected():
                 self.connection.close()
-                print("MySQL connection is closed")
+                #print("MySQL connection is closed")
     def ckeck_connection (self):
 
             if self.connection.is_connected():
